@@ -7,11 +7,11 @@
     <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Inter 폰트 설정 */
+        /* Inter font setting */
         body {
             font-family: 'Inter', sans-serif;
         }
-        /* 버튼 스타일 */
+        /* Button style */
         .fun-button {
             background-image: linear-gradient(to right, #6EE7B7 0%, #34D399 51%, #10B981 100%);
             margin: 10px;
@@ -44,17 +44,16 @@
   gtag('config', 'G-NXEW5H90P4');
 </script>
 </head>
-<body class="bg-gradient-to-r from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
+<body class="bg-gradient-to-r from-blue-400 to-purple-600 p-8">
 
-    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center transform transition-all duration-300 hover:scale-105">
-        <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Fun Fact!</h1>
+    <div class="w-full">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-6 text-left">Fun Fact!</h1>
         
-        <div id="factDisplay" class="text-lg text-gray-700 mb-8 p-6 bg-blue-50 rounded-xl border-2 border-blue-200 min-h-[300px] flex flex-col items-start justify-center italic text-left">
-            <!-- Facts will be displayed here in multiple languages -->
+        <div id="factDisplay" class="text-lg text-gray-700 mb-8 italic">
             Click the button to get a fun fact in multiple languages!
         </div>
 
-        <button id="newFactButton" class="fun-button w-auto mx-auto">
+        <button id="newFactButton" class="fun-button w-auto">
             Show New Fact
         </button>
     </div>
@@ -88,7 +87,7 @@
                 ko: "사람은 평생 동안 평균 8마리의 거미를 잠결에 먹는다.",
                 'zh-Hans': "人类一生中平均在睡觉时吃掉8只蜘蛛。",
                 ja: "人間は一生のうちに平均して8匹のクモを寝ている間に食べます。",
-                es: "Los humanos comen un promedio de 8 arañas en su vida mientras duermen."
+                es: "Los humanos comen un promedio de 8 arañas en su vida mientras durmen."
             },
             {
                 en: "Goldfish do not have a three-second memory. They can actually remember things for several months.",
@@ -382,7 +381,7 @@
                 ko: "유사에 빠져 익사하는 것은 불가능하다.",
                 'zh-Hans': "不可能在流沙中淹死自己。",
                 ja: "流砂で溺れることは不可能です。",
-                es: "Es imposible ahogarse en arenas movedizas."
+                es: "Es impossible ahogarse en arenas movedizas."
             },
             {
                 en: "The Great Wall of China is not visible from space with the naked eye.",
@@ -453,15 +452,6 @@
         const factDisplay = document.getElementById('factDisplay');
         const newFactButton = document.getElementById('newFactButton');
 
-        // Define language labels for display (no longer used for display, but kept for reference if needed later)
-        const languageLabels = {
-            en: "English",
-            ko: "한국어",
-            'zh-Hans': "简体中文",
-            ja: "日本語",
-            es: "Español"
-        };
-
         // Order of languages for display
         const languagesOrder = ['en', 'ko', 'zh-Hans', 'ja', 'es'];
 
@@ -474,7 +464,6 @@
             let factHtml = '';
             // Iterate through the desired language order and build the HTML string
             languagesOrder.forEach(langKey => {
-                // Removed the language label display as requested
                 const factText = selectedFact[langKey] || "Translation not available."; // Fallback if translation is missing
                 factHtml += `<p class="mb-2 last:mb-0">${factText}</p>`;
             });
