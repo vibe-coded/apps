@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Cat Photo</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Custom styles for the Inter font */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+    </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NXEW5H90P4');
+</script>
+</head>
+<body class="fixed inset-0 flex items-center justify-center bg-gray-900 overflow-hidden">
+
+    <!-- Main container to fill the entire screen -->
+    <div id="app-container" class="fixed inset-0 flex items-center justify-center bg-gray-900 font-inter overflow-hidden">
+        <!-- Loading state -->
+        <div id="loading-indicator" class="flex flex-col items-center justify-center text-white text-2xl animate-pulse hidden">
+            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="mt-4">Loading cat photo...</span>
+        </div>
+
+        <!-- Error state -->
+        <div id="error-message" class="bg-red-700 bg-opacity-80 text-white px-8 py-6 rounded-xl relative text-center text-xl shadow-lg hidden">
+            <strong class="font-bold">Error!</strong>
+            <span class="block mt-2" id="error-text"></span>
+            <span class="block text-sm mt-2">Please refresh the page to try again.</span>
+        </div>
+
+        <!-- Image container -->
+        <!-- Changed classes to display image at actual size, centered, and within screen bounds -->
+        <img id="cat-image" alt="Cute Cat" class="max-w-full max-h-full object-contain hidden">
+    </div>
+
+    <script>
+        // Get references to DOM elements
+        const loadingIndicator = document.getElementById('loading-indicator');
+        const errorMessage = document.getElementById('error-message');
+        const errorText = document.getElementById('error-text');
+        const catImage = document.getElementById('cat-image');
+
+        // Function to show/hide elements
+        const showElement = (element) => element.classList.remove('hidden');
+        const hideElement = (element) => element.classList.add('hidden');
+
+        // Asynchronous function to fetch a cat image
+        const fetchCatImage = async () => {
+            showElement(loadingIndicator); // Show loading indicator
+            hideElement(errorMessage);     // Hide any previous error message
+            hideElement(catImage);         // Hide previous image
+
+            try {
+                // Fetch a random cat image from TheCatAPI
+                const response = await fetch('https://api.thecatapi.com/v1/images/search', {
+                    headers: {
+                        'x-api-key': 'YOUR_API_KEY_HERE' // Insert your TheCatAPI key here (optional, but recommended for more requests)
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`HTTP error! Status: ${response.status}`);
+                }
+
+                const data = await response.json();
+                if (data && data.length > 0 && data[0].url) {
+                    catImage.src = data[0].url; // Set the image source
+                    showElement(catImage);      // Show the image
+                } else {
+                    throw new Error('No cat image found.');
+                }
+            } catch (err) {
+                console.error('Error fetching cat image:', err);
+                errorText.textContent = 'Failed to fetch cat image. Please try again.'; // Set error message
+                showElement(errorMessage); // Show error message
+            } finally {
+                hideElement(loadingIndicator); // Hide loading indicator
+            }
+        };
+
+        // Add an error handler for the image itself
+        catImage.onerror = () => {
+            catImage.onerror = null; // Prevent infinite loop
+            catImage.src = 'https://placehold.co/1920x1080/6A0DAD/FFFFFF?text=Image+Load+Failed'; // Larger placeholder
+            errorText.textContent = 'Failed to load image. Please refresh.'; // Set error for the image itself
+            showElement(errorMessage); // Show error message
+            hideElement(loadingIndicator); // Hide loading indicator if it was still showing
+        };
+
+        // Fetch a cat image when the page loads
+        window.onload = fetchCatImage;
+    </script>
+</body>
+</html>
