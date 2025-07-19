@@ -1,4 +1,4 @@
-<!DOCTYPE html>
+<!DOCTYPE type html>
 <html lang="ko">
 <head>
     <meta charset="UTF-8">
@@ -46,6 +46,7 @@
         const App = () => {
             const [inputWord, setInputWord] = React.useState('');
             const [story, setStory] = React.useState('');
+            const [englishStory, setEnglishStory] = React.useState(''); // 영문 번역 상태 추가
             const [isLoading, setIsLoading] = React.useState(false);
             const [error, setError] = React.useState('');
 
@@ -57,35 +58,64 @@
 
                 setIsLoading(true);
                 setStory('');
+                setEnglishStory(''); // 영문 번역 초기화
                 setError('');
 
                 try {
-                    const prompt = `"${inputWord}"이라는 단어를 포함하는 짧고 창의적인 이야기를 한국어로 작성해주세요. 이야기는 최소 50단어 이상이어야 합니다.`;
+                    // 한국어 이야기 생성 프롬프트
+                    const koreanPrompt = `"${inputWord}"이라는 단어를 포함하는 짧고 창의적인 이야기를 한국어로 작성해주세요. 이야기는 최소 50단어 이상이어야 합니다.`;
 
-                    let chatHistory = [];
-                    chatHistory.push({ role: "user", parts: [{ text: prompt }] });
+                    let chatHistoryKorean = [];
+                    chatHistoryKorean.push({ role: "user", parts: [{ text: koreanPrompt }] });
 
-                    const payload = { contents: chatHistory };
-                    // API 키는 Canvas 환경에서 자동으로 제공됩니다.
-                    const apiKey = "AIzaSyDT_gy2myWyUQFwiUeCdtusaVvoqIU4BFQ";
+                    const payloadKorean = { contents: chatHistoryKorean };
+                    const apiKey = ""; // API 키는 Canvas 환경에서 자동으로 제공됩니다.
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-                    const response = await fetch(apiUrl, {
+                    // 한국어 이야기 생성
+                    const responseKorean = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
-                        body: JSON.stringify(payload)
+                        body: JSON.stringify(payloadKorean)
                     });
 
-                    const result = await response.json();
+                    const resultKorean = await responseKorean.json();
+                    let generatedKoreanText = '';
 
-                    if (result.candidates && result.candidates.length > 0 &&
-                        result.candidates[0].content && result.candidates[0].content.parts &&
-                        result.candidates[0].content.parts.length > 0) {
-                        const generatedText = result.candidates[0].content.parts[0].text;
-                        setStory(generatedText);
+                    if (resultKorean.candidates && resultKorean.candidates.length > 0 &&
+                        resultKorean.candidates[0].content && resultKorean.candidates[0].content.parts &&
+                        resultKorean.candidates[0].content.parts.length > 0) {
+                        generatedKoreanText = resultKorean.candidates[0].content.parts[0].text;
+                        setStory(generatedKoreanText);
+
+                        // 한국어 이야기 생성 성공 후, 영문 번역 요청
+                        const englishTranslatePrompt = `다음 한국어 이야기를 영어로 번역해주세요: \n\n${generatedKoreanText}`;
+                        let chatHistoryEnglish = [];
+                        chatHistoryEnglish.push({ role: "user", parts: [{ text: englishTranslatePrompt }] });
+
+                        const payloadEnglish = { contents: chatHistoryEnglish };
+
+                        const responseEnglish = await fetch(apiUrl, {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify(payloadEnglish)
+                        });
+
+                        const resultEnglish = await responseEnglish.json();
+
+                        if (resultEnglish.candidates && resultEnglish.candidates.length > 0 &&
+                            resultEnglish.candidates[0].content && resultEnglish.candidates[0].content.parts &&
+                            resultEnglish.candidates[0].content.parts.length > 0) {
+                            const translatedEnglishText = resultEnglish.candidates[0].content.parts[0].text;
+                            setEnglishStory(translatedEnglishText);
+                        } else {
+                            setError('영문 번역을 생성하는 데 실패했습니다.');
+                            console.error('API 응답 구조가 예상과 다릅니다 (영문 번역):', resultEnglish);
+                        }
+
                     } else {
                         setError('이야기를 생성하는 데 실패했습니다. 다시 시도해주세요.');
-                        console.error('API 응답 구조가 예상과 다릅니다:', result);
+                        console.error('API 응답 구조가 예상과 다릅니다 (한국어 이야기):', resultKorean);
                     }
                 } catch (err) {
                     setError('이야기를 생성하는 중 오류가 발생했습니다: ' + err.message);
@@ -143,8 +173,15 @@
 
                     {story && (
                         <div className="mt-8 p-0">
-                            <h2 className="text-2xl font-bold text-gray-700 mb-4">생성된 이야기:</h2>
+                            <h2 className="text-2xl font-bold text-gray-700 mb-4">생성된 이야기 (한국어):</h2>
                             <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{story}</p>
+                        </div>
+                    )}
+
+                    {englishStory && (
+                        <div className="mt-8 p-0">
+                            <h2 className="text-2xl font-bold text-gray-700 mb-4">생성된 이야기 (영어):</h2>
+                            <p className="text-gray-800 leading-relaxed whitespace-pre-wrap">{englishStory}</p>
                         </div>
                     )}
                 </div>
