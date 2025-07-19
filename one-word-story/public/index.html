@@ -11,6 +11,10 @@
     <style>
         body {
             font-family: 'Inter', sans-serif;
+            background-size: cover; /* 배경 이미지 전체 커버 */
+            background-position: center; /* 배경 이미지 중앙 정렬 */
+            background-repeat: no-repeat; /* 배경 이미지 반복 없음 */
+            transition: background-image 0.5s ease-in-out; /* 배경 이미지 전환 효과 */
         }
         /* 로딩 스피너 애니메이션 */
         @keyframes spin {
@@ -21,15 +25,6 @@
             animation: spin 1s linear infinite;
         }
     </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-NXEW5H90P4');
-</script>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-purple-100 to-indigo-200">
     <div id="root" class="w-full max-w-2xl">
@@ -46,8 +41,9 @@
         const App = () => {
             const [inputWord, setInputWord] = React.useState('');
             const [story, setStory] = React.useState('');
-            const [englishStory, setEnglishStory] = React.useState(''); // 영문 번역 상태 추가
+            const [englishStory, setEnglishStory] = React.useState('');
             const [isLoading, setIsLoading] = React.useState(false);
+            const [loadingMessage, setLoadingMessage] = React.useState('');
             const [error, setError] = React.useState('');
 
             const generateStory = async () => {
@@ -58,27 +54,31 @@
 
                 setIsLoading(true);
                 setStory('');
-                setEnglishStory(''); // 영문 번역 초기화
+                setEnglishStory('');
                 setError('');
+                document.body.style.backgroundImage = ''; // 기존 배경 이미지 초기화
 
                 try {
-                    // 한국어 이야기 생성 프롬프트
+                    setLoadingMessage('이야기 생성 중...');
                     const koreanPrompt = `"${inputWord}"이라는 단어를 포함하는 짧고 창의적인 이야기를 한국어로 작성해주세요. 이야기는 최소 50단어 이상이어야 합니다.`;
 
                     let chatHistoryKorean = [];
                     chatHistoryKorean.push({ role: "user", parts: [{ text: koreanPrompt }] });
 
                     const payloadKorean = { contents: chatHistoryKorean };
-                    const apiKey = ""; // API 키는 Canvas 환경에서 자동으로 제공됩니다.
+                    const apiKey = "AIzaSyDT_gy2myWyUQFwiUeCdtusaVvoqIU4BFQ";
                     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-                    // 한국어 이야기 생성
                     const responseKorean = await fetch(apiUrl, {
                         method: 'POST',
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify(payloadKorean)
                     });
 
+                    if (!responseKorean.ok) {
+                        const errorText = await responseKorean.text();
+                        throw new Error(`한국어 이야기 생성 실패: ${responseKorean.status} - ${errorText}`);
+                    }
                     const resultKorean = await responseKorean.json();
                     let generatedKoreanText = '';
 
@@ -88,8 +88,9 @@
                         generatedKoreanText = resultKorean.candidates[0].content.parts[0].text;
                         setStory(generatedKoreanText);
 
-                        // 한국어 이야기 생성 성공 후, 영문 번역 요청
-                        const englishTranslatePrompt = `다음 한국어 이야기를 영어로 번역해주세요: \n\n${generatedKoreanText}`;
+                        setLoadingMessage('이야기 번역 중...');
+                        // 영문 번역 프롬프트 수정: 번역만 제공하도록 지시
+                        const englishTranslatePrompt = `Translate the following Korean story into English. Provide only the translated text, without any introductory phrases or additional conversational remarks:\n\n${generatedKoreanText}`;
                         let chatHistoryEnglish = [];
                         chatHistoryEnglish.push({ role: "user", parts: [{ text: englishTranslatePrompt }] });
 
@@ -101,13 +102,46 @@
                             body: JSON.stringify(payloadEnglish)
                         });
 
+                        if (!responseEnglish.ok) {
+                            const errorText = await responseEnglish.text();
+                            throw new Error(`영문 번역 실패: ${responseEnglish.status} - ${errorText}`);
+                        }
                         const resultEnglish = await responseEnglish.json();
+                        let translatedEnglishText = '';
 
                         if (resultEnglish.candidates && resultEnglish.candidates.length > 0 &&
                             resultEnglish.candidates[0].content && resultEnglish.candidates[0].content.parts &&
                             resultEnglish.candidates[0].content.parts.length > 0) {
-                            const translatedEnglishText = resultEnglish.candidates[0].content.parts[0].text;
+                            translatedEnglishText = resultEnglish.candidates[0].content.parts[0].text;
                             setEnglishStory(translatedEnglishText);
+
+                            setLoadingMessage('이미지 생성 중...');
+                            const imagePayload = { instances: { prompt: inputWord }, parameters: { "sampleCount": 1} };
+                            const imageUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
+
+                            const imageResponse = await fetch(imageUrl, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify(imagePayload)
+                            });
+
+                            if (!imageResponse.ok) {
+                                const errorText = await imageResponse.text();
+                                throw new Error(`이미지 생성 실패: ${imageResponse.status} - ${errorText}`);
+                            }
+                            const imageResult = await imageResponse.json();
+
+                            if (imageResult.predictions && imageResult.predictions.length > 0 && imageResult.predictions[0].bytesBase64Encoded) {
+                                const imageData = imageResult.predictions[0].bytesBase64Encoded;
+                                document.body.style.backgroundImage = `url(data:image/png;base64,${imageData})`;
+                                document.body.style.backgroundSize = 'cover';
+                                document.body.style.backgroundPosition = 'center';
+                                document.body.style.backgroundRepeat = 'no-repeat';
+                            } else {
+                                setError('이미지를 생성하는 데 실패했습니다.');
+                                console.error('API 응답 구조가 예상과 다릅니다 (이미지 생성):', imageResult);
+                            }
+
                         } else {
                             setError('영문 번역을 생성하는 데 실패했습니다.');
                             console.error('API 응답 구조가 예상과 다릅니다 (영문 번역):', resultEnglish);
@@ -122,6 +156,7 @@
                     console.error('API 호출 오류:', err);
                 } finally {
                     setIsLoading(false);
+                    setLoadingMessage('');
                 }
             };
 
@@ -163,6 +198,12 @@
                             )}
                         </button>
                     </div>
+
+                    {isLoading && loadingMessage && (
+                        <div className="text-center text-indigo-700 mb-4">
+                            <p>{loadingMessage}</p>
+                        </div>
+                    )}
 
                     {error && (
                         <div className="text-red-700 text-center mb-6" role="alert">
