@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "vibe-random-facts",
+    "site": "dog-fetcher",
     "public": "public",
     "ignore": [
       "firebase.json",
