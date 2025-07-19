@@ -1,0 +1,493 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Random Fun Fact</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Inter 폰트 설정 */
+        body {
+            font-family: 'Inter', sans-serif;
+        }
+        /* 버튼 스타일 */
+        .fun-button {
+            background-image: linear-gradient(to right, #6EE7B7 0%, #34D399 51%, #10B981 100%);
+            margin: 10px;
+            padding: 15px 45px;
+            text-align: center;
+            text-transform: uppercase;
+            transition: 0.5s;
+            background-size: 200% auto;
+            color: white;
+            box-shadow: 0 0 20px #eee;
+            border-radius: 10px;
+            display: block;
+            cursor: pointer;
+            border: none;
+        }
+
+        .fun-button:hover {
+            background-position: right center; /* change the direction of the change here */
+            color: #fff;
+            text-decoration: none;
+        }
+    </style>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-NXEW5H90P4');
+</script>
+</head>
+<body class="bg-gradient-to-r from-blue-400 to-purple-600 min-h-screen flex items-center justify-center p-4">
+
+    <div class="bg-white p-8 rounded-2xl shadow-2xl max-w-lg w-full text-center transform transition-all duration-300 hover:scale-105">
+        <h1 class="text-4xl font-extrabold text-gray-800 mb-6">Fun Fact!</h1>
+        
+        <div id="factDisplay" class="text-lg text-gray-700 mb-8 p-6 bg-blue-50 rounded-xl border-2 border-blue-200 min-h-[300px] flex flex-col items-start justify-center italic text-left">
+            <!-- Facts will be displayed here in multiple languages -->
+            Click the button to get a fun fact in multiple languages!
+        </div>
+
+        <button id="newFactButton" class="fun-button w-auto mx-auto">
+            Show New Fact
+        </button>
+    </div>
+
+    <script>
+        // Array of fun facts, each with translations for multiple languages
+        const funFacts = [
+            {
+                en: "Honey never spoils. Archaeologists have found pots of honey in ancient Egyptian tombs, and it was still edible.",
+                ko: "꿀은 상하지 않는다. 고고학자들은 고대 이집트 무덤에서 수천 년 된 꿀을 발견하였으며, 이는 여전히 먹을 수 있었다.",
+                'zh-Hans': "蜂蜜永不腐烂。考古学家在古埃及陵墓中发现了数千年的蜂蜜，它仍然可以食用。",
+                ja: "蜂蜜は腐りません。考古学者は古代エジプトの墓で数千年前の蜂蜜を発見しましたが、それはまだ食べられました。",
+                es: "La miel nunca se echa a perder. Los arqueólogos han encontrado vasijas de miel en tumbas egipcias antiguas, y todavía era comestible."
+            },
+            {
+                en: "The driest place on Earth is the Dry Valleys in Antarctica. It hasn't rained there for 2 million years.",
+                ko: "지구에서 가장 건조한 곳은 남극의 드라이 밸리이다. 이곳에는 지난 2백만 년 동안 비가 오지 않았다.",
+                'zh-Hans': "地球上最干燥的地方是南极洲的干谷。那里已经有200万年没有下雨了。",
+                ja: "地球上で最も乾燥している場所は南極のドライバレーです。そこでは200万年間雨が降っていません。",
+                es: "El lugar más seco de la Tierra son los Valles Secos de la Antártida. No ha llovido allí en 2 millones de años."
+            },
+            {
+                en: "Flamingos eat with their heads upside down.",
+                ko: "플라밍고는 머리를 거꾸로 뒤집은 채 먹는다.",
+                'zh-Hans': "火烈鸟倒着头吃饭。",
+                ja: "フラミンゴは頭を逆さまにして食べます。",
+                es: "Los flamencos comen con la cabeza boca abajo."
+            },
+            {
+                en: "Humans eat an average of 8 spiders in their lifetime while they sleep.",
+                ko: "사람은 평생 동안 평균 8마리의 거미를 잠결에 먹는다.",
+                'zh-Hans': "人类一生中平均在睡觉时吃掉8只蜘蛛。",
+                ja: "人間は一生のうちに平均して8匹のクモを寝ている間に食べます。",
+                es: "Los humanos comen un promedio de 8 arañas en su vida mientras duermen."
+            },
+            {
+                en: "Goldfish do not have a three-second memory. They can actually remember things for several months.",
+                ko: "금붕어는 3초 기억력을 가지고 있지 않다. 실제로는 몇 달 동안 기억할 수 있다.",
+                'zh-Hans': "金鱼没有三秒钟的记忆。它们实际上可以记住几个月的事情。",
+                ja: "金魚に3秒の記憶力はありません。実際には数ヶ月間覚えることができます。",
+                es: "Los peces de colores no tienen una memoria de tres segundos. En realidad, pueden recordar cosas durante varios meses."
+            },
+            {
+                en: "An octopus has three hearts.",
+                ko: "문어는 심장이 3개 있다.",
+                'zh-Hans': "章鱼有三颗心脏。",
+                ja: "タコには3つの心臓があります。",
+                es: "Un pulpo tiene tres corazones."
+            },
+            {
+                en: "The only mammal capable of true flight is the bat.",
+                ko: "하늘을 날 수 있는 유일한 포유류는 박쥐이다.",
+                'zh-Hans': "唯一能真正飞行的哺乳动物是蝙蝠。",
+                ja: "真の飛行ができる唯一の哺乳類はコウモリです。",
+                es: "El único mamífero capaz de volar de verdad es el murciélago."
+            },
+            {
+                en: "Bees tell each other where to find flowers by dancing.",
+                ko: "벌은 춤을 춰서 서로에게 꽃의 위치를 알려준다.",
+                'zh-Hans': "蜜蜂通过跳舞告诉彼此花朵的位置。",
+                ja: "ミツバチはダンスで花の場所を教え合います。",
+                es: "Las abejas se comunican la ubicación de las flores bailando."
+            },
+            {
+                en: "Polar bears have black skin.",
+                ko: "북극곰의 피부는 검은색이다.",
+                'zh-Hans': "北极熊的皮肤是黑色的。",
+                ja: "ホッキョクグマの皮膚は黒いです。",
+                es: "Los osos polares tienen la piel negra."
+            },
+            {
+                en: "Human DNA is 50% similar to a banana's.",
+                ko: "인간의 DNA는 바나나와 50% 정도 일치한다.",
+                'zh-Hans': "人类DNA与香蕉的相似度为50%。",
+                ja: "人間のDNAはバナナと50%程度似ています。",
+                es: "El ADN humano es 50% similar al de un plátano."
+            },
+            {
+                en: "A group of owls is called a parliament.",
+                ko: "올빼미 무리는 '의회(parliament)'라고 불린다.",
+                'zh-Hans': "一群猫头鹰被称为“议会”。",
+                ja: "フクロウの群れは「議会」と呼ばれます。",
+                es: "Un grupo de búhos se llama parlamento."
+            },
+            {
+                en: "The shortest war in history was between Britain and Zanzibar on August 27, 1896. Zanzibar surrendered after 38 minutes.",
+                ko: "역사상 가장 짧은 전쟁은 1896년 8월 27일 영국과 잔지바르 사이에 일어났다. 잔지바르는 38분 만에 항복하였다.",
+                'zh-Hans': "历史上最短的战争是1896年8月27日英属和桑给巴尔之间的战争。桑给巴尔在38分钟后投降。",
+                ja: "歴史上最も短い戦争は、1896年8月27日のイギリスとザンジバルの間でした。ザンジバルは38分後に降伏しました。",
+                es: "La guerra más corta de la historia fue entre Gran Bretaña y Zanzíbar el 27 de agosto de 1896. Zanzíbar se rindió después de 38 minutos."
+            },
+            {
+                en: "Cows have best friends.",
+                ko: "소에게도 가장 친한 친구가 있다.",
+                'zh-Hans': "奶牛有最好的朋友。",
+                ja: "牛には親友がいます。",
+                es: "Las vacas tienen mejores amigos."
+            },
+            {
+                en: "It is impossible for most people to lick their own elbow.",
+                ko: "대부분의 사람은 자신의 팔꿈치를 핥을 수 없다.",
+                'zh-Hans': "大多数人不可能舔到自己的手肘。",
+                ja: "ほとんどの人は自分の肘をなめることができません。",
+                es: "Es imposible para la mayoría de las personas lamerse el propio codo."
+            },
+            {
+                en: "A crocodile cannot stick its tongue out.",
+                ko: "악어는 혀를 내밀 수 없다.",
+                'zh-Hans': "鳄鱼不能伸出舌头。",
+                ja: "ワニは舌を出すことができません。",
+                es: "Un cocodrilo no puede sacar la lengua."
+            },
+            {
+                en: "A shrimp's heart is in its head.",
+                ko: "새우의 심장은 머리에 있다.",
+                'zh-Hans': "虾的心脏在头部。",
+                ja: "エビの心臓は頭の中にあります。",
+                es: "El corazón de un camarón está en su cabeza."
+            },
+            {
+                en: "It is physically impossible for pigs to look up into the sky.",
+                ko: "돼지는 물리적으로 하늘을 올려다볼 수 없다.",
+                'zh-Hans': "猪在生理上不可能抬头看天空。",
+                ja: "豚は物理的に空を見上げることができません。",
+                es: "Es físicamente imposible para los cerdos mirar hacia el cielo."
+            },
+            {
+                en: "The 'sixth sick sheik's sixth sheep's sick' is believed to be the toughest tongue twister in the English language.",
+                ko: "'sixth sick sheik's sixth sheep's sick'는 영어에서 가장 어려운 혀꼬임 문장으로 알려져 있다.",
+                'zh-Hans': "“第六个生病的酋长的第六只生病的羊”被认为是英语中最难的绕口令。",
+                ja: "「sixth sick sheik's sixth sheep's sick」は英語で最も難しい早口言葉だと考えられています。",
+                es: "Se cree que 'sixth sick sheik's sixth sheep's sick' es el trabalenguas más difícil del idioma inglés."
+            },
+            {
+                en: "If you sneeze too hard, you could fracture a rib.",
+                ko: "너무 세게 재채기하면 갈비뼈가 부러질 수도 있다.",
+                'zh-Hans': "如果你打喷嚏太用力，可能会导致肋骨骨折。",
+                ja: "くしゃみをしすぎると、肋骨が折れる可能性があります。",
+                es: "Si estornudas muy fuerte, podrías fracturarte una costilla."
+            },
+            {
+                en: "Wearing headphones for just an hour will increase the bacteria in your ear by 700 times.",
+                ko: "단 한 시간 동안 헤드폰을 착용하면 귀에 있는 박테리아가 700배 증가한다.",
+                'zh-Hans': "只戴一小时耳机，耳朵里的细菌就会增加700倍。",
+                ja: "ヘッドホンを1時間装着するだけで、耳の中のバクテリアが700倍に増加します。",
+                es: "Usar auriculares solo una hora aumentará las bacterias en tu oído 700 veces."
+            },
+            {
+                en: "In 2006, a man tried to sell his soul on eBay.",
+                ko: "2006년에 한 남자가 이베이에서 자신의 영혼을 팔려고 시도하였다.",
+                'zh-Hans': "2006年，一名男子试图在eBay上出售自己的灵魂。",
+                ja: "2006年、ある男性がeBayで自分の魂を売ろうとしました。",
+                es: "En 2006, un hombre intentó vender su alma en eBay."
+            },
+            {
+                en: "The average person walks the equivalent of five times around the world in their lifetime.",
+                ko: "평균적인 사람은 평생 동안 지구를 다섯 바퀴 도는 것과 같은 거리를 걷는다.",
+                'zh-Hans': "普通人一生中行走的距离相当于绕地球五圈。",
+                ja: "平均的な人は一生のうちに地球を5周する距離を歩きます。",
+                es: "La persona promedio camina el equivalente a cinco veces alrededor del mundo en su vida."
+            },
+            {
+                en: "A snail can sleep for three years.",
+                ko: "달팽이는 3년 동안 잠을 잘 수 있다.",
+                'zh-Hans': "蜗牛可以睡三年。",
+                ja: "カタツムリは3年間眠ることができます。",
+                es: "Un caracol puede dormir durante tres años."
+            },
+            {
+                en: "The electric chair was invented by a dentist.",
+                ko: "전기의자는 치과 의사가 발명하였다.",
+                'zh-Hans': "电椅是由一位牙医发明的。",
+                ja: "電気椅子は歯科医によって発明されました。",
+                es: "La silla eléctrica fue inventada por un dentista."
+            },
+            {
+                en: "The strongest muscle in the body is the tongue.",
+                ko: "몸에서 가장 강한 근육은 혀이다.",
+                'zh-Hans': "身体中最强的肌肉是舌头。",
+                ja: "体の中で最も強い筋肉は舌です。",
+                es: "El músculo más fuerte del cuerpo es la lengua."
+            },
+            {
+                en: "The only letter in the alphabet that doesn't appear in the name of any U.S. state is 'Q'.",
+                ko: "알파벳 중 미국 주의 이름에 나타나지 않는 유일한 글자는 'Q'이다.",
+                'zh-Hans': "字母表中唯一没有出现在任何美国州名中的字母是“Q”。",
+                ja: "アルファベットの中で、アメリカの州の名前に現れない唯一の文字は「Q」です。",
+                es: "La única letra del alfabeto que no aparece en el nombre de ningún estado de EE. UU. es la 'Q'."
+            },
+            {
+                en: "You can't hum while holding your nose.",
+                ko: "코를 잡고는 콧노래를 부를 수 없다.",
+                'zh-Hans': "捏着鼻子就不能哼唱。",
+                ja: "鼻をつまんでハミングすることはできません。",
+                es: "No puedes tararear mientras te tapas la nariz."
+            },
+            {
+                en: "A 'jiffy' is an actual unit of time: 1/100th of a second.",
+                ko: "'jiffy'는 실제 시간 단위로, 1/100초를 의미한다.",
+                'zh-Hans': "“瞬间”是一个实际的时间单位：1/100秒。",
+                ja: "「ジフィー」は実際の時間の単位で、100分の1秒です。",
+                es: "Un 'jiffy' es una unidad de tiempo real: 1/100 de segundo."
+            },
+            {
+                en: "A group of rhinoceroses is called a crash.",
+                ko: "코뿔소 무리는 'crash'라고 불린다.",
+                'zh-Hans': "一群犀牛被称为“碰撞”。",
+                ja: "サイの群れは「クラッシュ」と呼ばれます。",
+                es: "Un grupo de rinocerontes se llama un 'crash'."
+            },
+            {
+                en: "The average person spends 6 months of their life waiting for red lights to turn green.",
+                ko: "평균적인 사람은 평생 동안 신호등이 초록불로 바뀌기를 기다리는 데 6개월을 보낸다.",
+                'zh-Hans': "普通人一生中会花6个月的时间等待红灯变绿。",
+                ja: "平均的な人は、一生のうちに赤信号が青信号に変わるのを待つために6ヶ月を費やします。",
+                es: "La persona promedio pasa 6 meses de su vida esperando que los semáforos se pongan en verde."
+            },
+            {
+                en: "It is illegal to own just one guinea pig in Switzerland because they get lonely.",
+                ko: "스위스에서는 기니피그가 외로움을 타기 때문에 한 마리만 키우는 것이 불법이다.",
+                'zh-Hans': "在瑞士，只养一只豚鼠是违法的，因为它们会感到孤独。",
+                ja: "スイスでは、モルモットは寂しがり屋なので、1匹だけ飼うことは違法です。",
+                es: "Es ilegal tener solo un conejillo de indias en Suiza porque se sienten solos."
+            },
+            {
+                en: "The fear of long words is called hippopotomonstrosesquippedaliophobia.",
+                ko: "긴 단어에 대한 공포증은 'hippopotomonstrosesquippedaliophobia'라 불린다.",
+                'zh-Hans': "对长单词的恐惧被称为“河马怪物恐惧症”。",
+                ja: "長い単語への恐怖症は「hippopotomonstrosesquippedaliophobia」と呼ばれます。",
+                es: "El miedo a las palabras largas se llama hipopotomonstrosesquipedaliofobia."
+            },
+            {
+                en: "The world's oldest piece of chewing gum is 9,000 years old.",
+                ko: "세계에서 가장 오래된 껌 조각은 9,000년 전의 것이다.",
+                'zh-Hans': "世界上最古老的口香糖有9000年的历史。",
+                ja: "世界最古のチューインガムは9,000年前のものです。",
+                es: "El trozo de chicle más antiguo del mundo tiene 9.000 años."
+            },
+            {
+                en: "The original name for the butterfly was 'flutterby'.",
+                ko: "나비의 원래 이름은 'flutterby'였다.",
+                'zh-Hans': "蝴蝶的原始名称是“flutterby”。",
+                ja: "蝶の元の名前は「flutterby」でした。",
+                es: "El nombre original de la mariposa era 'flutterby'."
+            },
+            {
+                en: "Ketchup was once sold as medicine.",
+                ko: "케첩은 한때 약으로 판매되었다.",
+                'zh-Hans': "番茄酱曾被当作药物出售。",
+                ja: "ケチャップはかつて薬として販売されていました。",
+                es: "El kétchup se vendió una vez como medicina."
+            },
+            {
+                en: "There are more possible chess games than atoms in the observable universe.",
+                ko: "관측 가능한 우주의 원자 수보다 가능한 체스 게임의 수가 더 많다.",
+                'zh-Hans': "可能的国际象棋棋局数量比可观测宇宙中的原子数量还要多。",
+                ja: "観測可能な宇宙の原子数よりも、可能なチェスゲームの数の方が多いです。",
+                es: "Hay más partidas de ajedrez posibles que átomos en el universo observable."
+            },
+            {
+                en: "The longest recorded flight of a chicken is 13 seconds.",
+                ko: "닭의 가장 긴 기록된 비행은 13초이다.",
+                'zh-Hans': "有记录以来鸡的最长飞行时间是13秒。",
+                ja: "ニワトリの最長飛行記録は13秒です。",
+                es: "El vuelo más largo registrado de un pollo es de 13 segundos."
+            },
+            {
+                en: "More people are killed by donkeys annually than by plane crashes.",
+                ko: "매년 비행기 추락 사고보다 당나귀에 의해 사망하는 사람이 더 많다.",
+                'zh-Hans': "每年被驴杀死的人比死于飞机失事的人多。",
+                ja: "飛行機事故よりも毎年ロバに殺される人の方が多いです。",
+                es: "Más personas mueren anualmente por burros que por accidentes aéreos."
+            },
+            {
+                en: "The Hawaiian alphabet has only 12 letters.",
+                ko: "하와이 알파벳은 12개의 글자만 있다.",
+                'zh-Hans': "夏威夷字母表只有12个字母。",
+                ja: "ハワイ語のアルファベットは12文字しかありません。",
+                es: "El alfabeto hawaiano tiene solo 12 letras."
+            },
+            {
+                en: "The average person will spend 25 years of their life asleep.",
+                ko: "평균적인 사람은 평생 동안 25년을 잠자는 데 보낸다.",
+                'zh-Hans': "普通人一生中将有25年的时间在睡眠中度过。",
+                ja: "平均的な人は一生のうち25年を睡眠に費やします。",
+                es: "La persona promedio pasará 25 años de su vida durmiendo."
+            },
+            {
+                en: "The human nose can remember 50,000 different scents.",
+                ko: "인간의 코는 50,000가지의 다른 냄새를 기억할 수 있다.",
+                'zh-Hans': "人类的鼻子可以记住50,000种不同的气味。",
+                ja: "人間の鼻は50,000種類の異なる匂いを覚えることができます。",
+                es: "La nariz humana puede recordar 50.000 olores diferentes."
+            },
+            {
+                en: "The total weight of all ants on Earth is roughly equal to the total weight of all humans on Earth.",
+                ko: "지구상의 모든 개미의 총 무게는 지구상의 모든 인간의 총 무게와 거의 같다.",
+                'zh-Hans': "地球上所有蚂蚁的总重量大约等于地球上所有人类的总重量。",
+                ja: "地球上のすべてのアリの総重量は、地球上のすべての人間の総重量とほぼ同じです。",
+                es: "El peso total de todas las hormigas en la Tierra es aproximadamente igual al peso total de todos los humanos en la Tierra."
+            },
+            {
+                en: "Butterflies taste with their feet.",
+                ko: "나비는 발로 맛을 느낀다.",
+                'zh-Hans': "蝴蝶用脚品尝。",
+                ja: "蝶は足で味を感じます。",
+                es: "Las mariposas saborean con sus patas."
+            },
+            {
+                en: "A cat has 32 muscles in each ear.",
+                ko: "고양이는 각 귀에 32개의 근육을 가지고 있다.",
+                'zh-Hans': "猫的每只耳朵有32块肌肉。",
+                ja: "猫の耳にはそれぞれ32個の筋肉があります。",
+                es: "Un gato tiene 32 músculos en cada oreja."
+            },
+            {
+                en: "The heart of a blue whale is so big that a human could swim through its arteries.",
+                ko: "대왕고래의 심장은 너무 커서 사람이 동맥을 통해 헤엄쳐 갈 수 있다.",
+                'zh-Hans': "蓝鲸的心脏大到人类可以游过它的动脉。",
+                ja: "シロナガスクジラの心臓は非常に大きく、人間がその動脈を泳いで通り抜けることができます。",
+                es: "El corazón de una ballena azul es tan grande que un humano podría nadar a través de sus arterias."
+            },
+            {
+                en: "It is impossible to drown yourself in quicksand.",
+                ko: "유사에 빠져 익사하는 것은 불가능하다.",
+                'zh-Hans': "不可能在流沙中淹死自己。",
+                ja: "流砂で溺れることは不可能です。",
+                es: "Es imposible ahogarse en arenas movedizas."
+            },
+            {
+                en: "The Great Wall of China is not visible from space with the naked eye.",
+                ko: "만리장성은 육안으로 우주에서 보이지 않는다.",
+                'zh-Hans': "长城肉眼在太空中是看不见的。",
+                ja: "万里の長城は肉眼では宇宙から見えません。",
+                es: "La Gran Muralla China no es visible desde el espacio a simple vista."
+            },
+            {
+                en: "The Eiffel Tower can be 15 cm taller during the summer due to thermal expansion.",
+                ko: "에펠탑은 열팽창으로 인해 여름에 15cm 더 높아질 수 있다.",
+                'zh-Hans': "由于热膨胀，埃菲尔铁塔在夏天可以高出15厘米。",
+                ja: "エッフェル塔は熱膨張により夏には15cm高くなることがあります。",
+                es: "La Torre Eiffel puede ser 15 cm más alta durante el verano debido a la expansión térmica."
+            },
+            {
+                en: "A group of ferrets is called a business.",
+                ko: "페럿 무리는 'business'라고 불린다.",
+                'zh-Hans': "一群雪貂被称为“生意”。",
+                ja: "フェレットの群れは「ビジネス」と呼ばれます。",
+                es: "Un grupo de hurones se llama 'business'."
+            },
+            {
+                en: "The average person checks their phone 110 times a day.",
+                ko: "평균적인 사람은 하루에 110번 휴대폰을 확인한다.",
+                'zh-Hans': "普通人每天查看手机110次。",
+                ja: "平均的な人は1日に110回携帯電話をチェックします。",
+                es: "La persona promedio revisa su teléfono 110 veces al día."
+            },
+            {
+                en: "The human brain weighs about 3 pounds but uses 20% of the body's oxygen and calories.",
+                ko: "인간의 뇌는 약 3파운드(약 1.36kg)이지만, 신체 산소와 칼로리의 20%를 사용한다.",
+                'zh-Hans': "人脑重约3磅，但消耗身体20%的氧气和卡路里。",
+                ja: "人間の脳は約3ポンドですが、体内の酸素とカロリーの20%を使用します。",
+                es: "El cerebro humano pesa alrededor de 3 libras, pero utiliza el 20% del oxígeno y las calorías del cuerpo."
+            },
+            {
+                en: "There are more stars in the universe than grains of sand on all the beaches on Earth.",
+                ko: "우주에는 지구의 모든 해변에 있는 모래알보다 더 많은 별이 있다.",
+                'zh-Hans': "宇宙中的星星比地球上所有海滩上的沙粒还要多。",
+                ja: "宇宙には、地球上のすべてのビーチの砂粒よりも多くの星があります。",
+                es: "Hay más estrellas en el universo que granos de arena en todas las playas de la Tierra."
+            },
+            {
+                en: "The shortest complete sentence in the English language is 'I am.'",
+                ko: "영어에서 가장 짧은 완전한 문장은 'I am.'이다.",
+                'zh-Hans': "英语中最短的完整句子是“I am.”",
+                ja: "英語で最も短い完全な文は「I am.」です。",
+                es: "La oración completa más corta en el idioma inglés es 'I am'."
+            },
+            {
+                en: "A bolt of lightning is five times hotter than the sun's surface.",
+                ko: "번개는 태양 표면보다 5배 더 뜨겁다.",
+                'zh-Hans': "一道闪电比太阳表面热五倍。",
+                ja: "雷は太陽の表面よりも5倍熱いです。",
+                es: "Un rayo es cinco veces más caliente que la superficie del sol."
+            },
+            {
+                en: "The unicorn is the national animal of Scotland.",
+                ko: "유니콘은 스코틀랜드의 국수이다.",
+                'zh-Hans': "独角兽是苏格兰的国兽。",
+                ja: "ユニコーンはスコットランドの国獣です。",
+                es: "El unicornio es el animal nacional de Escocia."
+            }
+        ];
+
+        // Get DOM elements
+        const factDisplay = document.getElementById('factDisplay');
+        const newFactButton = document.getElementById('newFactButton');
+
+        // Define language labels for display (no longer used for display, but kept for reference if needed later)
+        const languageLabels = {
+            en: "English",
+            ko: "한국어",
+            'zh-Hans': "简体中文",
+            ja: "日本語",
+            es: "Español"
+        };
+
+        // Order of languages for display
+        const languagesOrder = ['en', 'ko', 'zh-Hans', 'ja', 'es'];
+
+        // Function to display a new fact in all specified languages
+        function displayRandomFact() {
+            // Pick a new random fact object
+            const randomIndex = Math.floor(Math.random() * funFacts.length);
+            const selectedFact = funFacts[randomIndex];
+
+            let factHtml = '';
+            // Iterate through the desired language order and build the HTML string
+            languagesOrder.forEach(langKey => {
+                // Removed the language label display as requested
+                const factText = selectedFact[langKey] || "Translation not available."; // Fallback if translation is missing
+                factHtml += `<p class="mb-2 last:mb-0">${factText}</p>`;
+            });
+
+            // Update the fact display with the multi-language HTML
+            factDisplay.innerHTML = factHtml;
+        }
+
+        // Add click event listener to the button
+        newFactButton.addEventListener('click', displayRandomFact);
+
+        // Optional: Display an initial fact on page load
+        // displayRandomFact(); 
+    </script>
+</body>
+</html>
