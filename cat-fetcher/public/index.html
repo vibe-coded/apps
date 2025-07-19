@@ -22,12 +22,18 @@
   gtag('config', 'G-NXEW5H90P4');
 </script>
 </head>
-<body class="fixed inset-0 flex items-center justify-center bg-gray-900 overflow-hidden">
+<body class="fixed inset-0 flex items-center justify-center bg-gray-900 overflow-hidden p-4">
 
-    <!-- Main container to fill the entire screen -->
-    <div id="app-container" class="fixed inset-0 flex items-center justify-center bg-gray-900 font-inter overflow-hidden">
+    <!-- Main container to center content and provide background -->
+    <div id="app-container" class="flex flex-col items-center justify-center w-full h-full font-inter bg-gray-800 rounded-lg shadow-2xl p-6">
+
+        <!-- Title -->
+        <h1 class="text-5xl font-extrabold text-white mb-8 drop-shadow-lg text-center">
+            Fun Cat Photo
+        </h1>
+
         <!-- Loading state -->
-        <div id="loading-indicator" class="flex flex-col items-center justify-center text-white text-2xl animate-pulse hidden">
+        <div id="loading-indicator" class="flex flex-col items-center justify-center text-white text-2xl animate-pulse hidden mb-8">
             <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
                 <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
                 <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -36,15 +42,24 @@
         </div>
 
         <!-- Error state -->
-        <div id="error-message" class="bg-red-700 bg-opacity-80 text-white px-8 py-6 rounded-xl relative text-center text-xl shadow-lg hidden">
+        <div id="error-message" class="bg-red-700 bg-opacity-80 text-white px-8 py-6 rounded-xl relative text-center text-xl shadow-lg hidden mb-8">
             <strong class="font-bold">Error!</strong>
             <span class="block mt-2" id="error-text"></span>
             <span class="block text-sm mt-2">Please refresh the page to try again.</span>
         </div>
 
         <!-- Image container -->
-        <!-- Changed classes to display image at actual size, centered, and within screen bounds -->
-        <img id="cat-image" alt="Cute Cat" class="max-w-full max-h-full object-contain hidden">
+        <!-- Image will be centered and maintain aspect ratio within the available space -->
+        <img id="cat-image" alt="Cute Cat" class="max-w-full max-h-[70vh] object-contain rounded-lg shadow-xl hidden mb-8">
+
+        <!-- Refresh Button -->
+        <button
+            id="refresh-button"
+            onclick="location.reload()"
+            class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-full text-xl shadow-lg hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 focus:outline-none focus:ring-4 focus:ring-blue-300"
+        >
+            Refresh Photo
+        </button>
     </div>
 
     <script>
@@ -95,7 +110,7 @@
         // Add an error handler for the image itself
         catImage.onerror = () => {
             catImage.onerror = null; // Prevent infinite loop
-            catImage.src = 'https://placehold.co/1920x1080/6A0DAD/FFFFFF?text=Image+Load+Failed'; // Larger placeholder
+            catImage.src = 'https://placehold.co/1920x1080/6A0DAD/FFFFFF?text=Image+Load+Failed'; // Larger placeholder for error
             errorText.textContent = 'Failed to load image. Please refresh.'; // Set error for the image itself
             showElement(errorMessage); // Show error message
             hideElement(loadingIndicator); // Hide loading indicator if it was still showing
