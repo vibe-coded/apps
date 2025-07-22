@@ -240,10 +240,10 @@
       try {
         let chatHistory = [];
         // Base prompt for the idea and description.
-        let basePrompt = "Please give me one single, short, ridiculous, quirky, and fun idea, along with a brief, creative explanation for it. Provide both the idea and explanation in Korean first, followed by their English translations. The idea should be concise, and the explanation should be 1-2 sentences. Respond only with JSON in the format: {\"idea_ko\": \"아이디어 내용 (한국어)\", \"idea_en\": \"Idea content (English)\", \"description_ko\": \"설명 내용 (한국어)\", \"description_en\": \"Description content (English)\"}";
+        let basePrompt = "please give me one single, short, ridiculous, quirky, and fun idea, along with a brief, creative explanation for it. Provide both the idea and explanation in Korean first, followed by their English translations. The idea should be concise, and the explanation should be 1-2 sentences. Respond only with JSON in the format: {\"idea_ko\": \"아이디어 내용 (한국어)\", \"idea_en\": \"Idea content (English)\", \"description_ko\": \"설명 내용 (한국어)\", \"description_en\": \"Description content (English)\"}";
         
         // Append keyword to encourage diverse responses
-        const prompt = `${basePrompt} (키워드: ${keyword})`;
+        const prompt = `Regarding this keyword, ${keyword}, ${basePrompt}`;
         
         chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
