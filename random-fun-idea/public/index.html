@@ -6,7 +6,10 @@
   <title>Random Fun Idea</title>
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Inter font for general text -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+  <!-- Nanum Pen Script font for specific Korean text -->
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
   <style>
     body {
       font-family: 'Inter', sans-serif;
@@ -35,6 +38,11 @@
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
+    }
+    .app-title-korean {
+      font-family: 'Nanum Pen Script', cursive; /* Apply Nanum Pen Script */
+      font-size: 2.5rem; /* Adjust size if needed for readability */
+      line-height: 1.2;
     }
     .idea-display {
       min-height: 120px; /* Ensure consistent height */
@@ -135,7 +143,10 @@
 </head>
 <body>
   <div class="container">
-    <h1 class="text-4xl font-bold text-gray-800 mb-4">Random Fun Idea<br />기발하고 재밌는 아이디어 생성기</h1>
+    <h1 class="text-4xl font-bold text-gray-800 mb-4">
+      Random Fun Idea<br />
+      <span class="app-title-korean">기발하고 재밌는 아이디어 생성기 ^^;</span>
+    </h1>
     <div id="ideaDisplay" class="idea-display">
       <!-- Lightbulb loading spinner -->
       <svg class="loading-lightbulb" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor">
@@ -156,20 +167,47 @@
     const ideaDescription = document.getElementById('ideaDescription');
     const refreshButton = document.getElementById('refreshButton');
 
-    // Store the last 15 unique ideas to prevent immediate duplicates
+    // Store the first two words of the last 15 unique Korean ideas to prevent immediate duplicates
     let ideaHistory = [];
-    const MAX_HISTORY_SIZE = 15;
+    const MAX_HISTORY_SIZE = 50;
     const MAX_FETCH_RETRIES = 5; // Max attempts to get a unique idea from API
 
-    // Function to fetch a new idea and its description from Gemini API
-    async function fetchIdeaFromGemini() {
+    // Function to fetch a single random keyword from Gemini API
+    async function fetchKeywordFromGemini() {
+      try {
+        const prompt = "Give me one single, random, abstract keyword in Korean. Respond only with the keyword itself, no greetings or extra text.";
+        const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
+        const payload = { contents: chatHistory };
+        const apiKey = ""; // Canvas will automatically provide the API key
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+        const result = await response.json();
+        if (result.candidates && result.candidates.length > 0 &&
+            result.candidates[0].content && result.candidates[0].content.parts &&
+            result.candidates[0].content.parts.length > 0) {
+          return result.candidates[0].content.parts[0].text.trim();
+        }
+        return ""; // Return empty string if no keyword
+      } catch (error) {
+        console.error("Error fetching keyword:", error);
+        return ""; // Handle error gracefully
+      }
+    }
+
+    // Function to fetch a new idea and its description from Gemini API, optionally using a keyword
+    async function fetchIdeaFromGemini(keyword) {
       try {
         let chatHistory = [];
-        // Original prompt for the idea and description.
-        const basePrompt = "Please give me one single, short, ridiculous, quirky, and fun idea, along with a brief, creative explanation for it. Provide both the idea and explanation in Korean first, followed by their English translations. The idea should be concise, and the explanation should be 1-2 sentences. Respond only with JSON in the format: {\"idea_ko\": \"아이디어 내용 (한국어)\", \"idea_en\": \"Idea content (English)\", \"description_ko\": \"설명 내용 (한국어)\", \"description_en\": \"Description content (English)\"}";
+        // Base prompt for the idea and description.
+        let basePrompt = "Please give me one single, short, ridiculous, quirky, and fun idea, along with a brief, creative explanation for it. Provide both the idea and explanation in Korean first, followed by their English translations. The idea should be concise, and the explanation should be 1-2 sentences. Respond only with JSON in the format: {\"idea_ko\": \"아이디어 내용 (한국어)\", \"idea_en\": \"Idea content (English)\", \"description_ko\": \"설명 내용 (한국어)\", \"description_en\": \"Description content (English)\"}";
         
-        // Append a random UUID to the prompt to encourage diverse responses.
-        const prompt = `${basePrompt} UUID: ${crypto.randomUUID()}`;
+        // Append keyword if available to encourage diverse responses
+        const prompt = keyword ? `${basePrompt} (키워드: ${keyword})` : basePrompt;
         
         chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
@@ -204,8 +242,20 @@
           result.candidates[0].content && result.candidates[0].content.parts &&
           result.candidates[0].content.parts.length > 0) {
           const jsonString = result.candidates[0].content.parts[0].text;
-          const parsedJson = JSON.parse(jsonString);
-          return parsedJson; // Return the parsed JSON object
+          console.log("Raw JSON string from Gemini:", jsonString); // Log raw JSON for debugging
+          try {
+            const parsedJson = JSON.parse(jsonString);
+            return parsedJson; // Return the parsed JSON object
+          } catch (jsonError) {
+            console.error("Error parsing JSON from Gemini API:", jsonError);
+            console.error("Malformed JSON received:", jsonString);
+            return {
+              idea_ko: "아이디어 파싱 오류.",
+              idea_en: "Idea parsing error.",
+              description_ko: "잘못된 응답 형식입니다. 다시 시도해주세요.",
+              description_en: "Malformed response format. Please try again."
+            };
+          }
         } else {
           console.error("Gemini API response structure unexpected:", result);
           return {
@@ -248,12 +298,17 @@
         let isUnique = false;
         let retries = 0;
 
+        const keyword = await fetchKeywordFromGemini(); // Fetch keyword first
+
         // Loop to fetch a unique idea, up to MAX_FETCH_RETRIES times
         while (!isUnique && retries < MAX_FETCH_RETRIES) {
-          fetchedIdea = await fetchIdeaFromGemini();
-          // Check if the Korean idea is already in history
-          if (ideaHistory.includes(fetchedIdea.idea_ko)) {
-            console.log("Duplicate idea found, retrying...");
+          fetchedIdea = await fetchIdeaFromGemini(keyword); // Pass keyword to fetch function
+          
+          // Get the first two words of the Korean idea for duplicate check
+          const firstTwoWords = fetchedIdea.idea_ko.split(' ').slice(0, 2).join(' ');
+
+          if (ideaHistory.includes(firstTwoWords)) {
+            console.log("Duplicate idea (first 2 words) found, retrying...");
             retries++;
           } else {
             isUnique = true;
@@ -273,12 +328,15 @@
           };
         }
 
-        // Add the unique (or last fetched) idea to history
-        if (isUnique && fetchedIdea.idea_ko) {
-          ideaHistory.push(fetchedIdea.idea_ko);
-          // Keep history size limited
-          if (ideaHistory.length > MAX_HISTORY_SIZE) {
-            ideaHistory.shift(); // Remove the oldest idea
+        // Add the unique (or last fetched) idea's first two words to history
+        if (fetchedIdea.idea_ko) {
+          const currentIdeaFirstTwoWords = fetchedIdea.idea_ko.split(' ').slice(0, 2).join(' ');
+          if (!ideaHistory.includes(currentIdeaFirstTwoWords)) { // Ensure we don't add if it was already in history (e.g., after retries)
+            ideaHistory.push(currentIdeaFirstTwoWords);
+            // Keep history size limited
+            if (ideaHistory.length > MAX_HISTORY_SIZE) {
+              ideaHistory.shift(); // Remove the oldest idea
+            }
           }
         }
 
