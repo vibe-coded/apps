@@ -167,6 +167,9 @@
     const ideaDescription = document.getElementById('ideaDescription');
     const refreshButton = document.getElementById('refreshButton');
 
+    const apiKey = ""; // Canvas will automatically provide the API key
+    const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
+
     // Store the first two words of the last 15 unique Korean ideas to prevent immediate duplicates
     let ideaHistory = [];
     const MAX_HISTORY_SIZE = 50;
@@ -175,11 +178,9 @@
     // Function to fetch a single random keyword from Gemini API
     async function fetchKeywordFromGemini() {
       try {
-        const prompt = "Give me one single, random, abstract keyword in Korean. Respond only with the keyword itself, no greetings or extra text.";
+        const prompt = "Give me one single, random, abstract keyword. Respond only with the keyword itself, no greetings or extra text.";
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
         const payload = { contents: chatHistory };
-        const apiKey = ""; // Canvas will automatically provide the API key
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -227,8 +228,6 @@
             }
           }
         };
-        const apiKey = ""; // Canvas will automatically provide the API key
-        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
         const response = await fetch(apiUrl, {
           method: 'POST',
