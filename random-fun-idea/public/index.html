@@ -145,7 +145,7 @@
   <div class="container">
     <h1 class="text-4xl font-bold text-gray-800 mb-4">
       Random Fun Idea<br />
-      <span class="app-title-korean">기발하고 재밌는 아이디어 생성기 ^^;</span>
+      <span class="app-title-korean">기발하고 재밌는 아이디어 생성기</span>
     </h1>
     <div id="ideaDisplay" class="idea-display">
       <!-- Lightbulb loading spinner -->
@@ -170,17 +170,25 @@
     const apiKey = ""; // Canvas will automatically provide the API key
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-    // Store the last 50 unique keywords to prevent immediate duplicates
-    let keywordHistory = [];
-    const MAX_KEYWORD_HISTORY_SIZE = 50;
-    const MAX_FETCH_RETRIES = 5; // Max attempts to get a unique keyword or idea from API
+    // Store a queue of unique keywords fetched from Gemini
+    let keywordQueue = [];
+    const KEYWORD_BATCH_SIZE = 50; // Number of keywords to fetch at once
 
-    // Function to fetch a single random keyword from Gemini API
-    async function _fetchSingleKeywordFromGemini() {
+    // Function to fetch a batch of random keywords from Gemini API
+    async function _fetchKeywordsBatchFromGemini() {
       try {
-        const prompt = "Give me one single, random, abstract keyword in Korean. Respond only with the keyword itself, no greetings or extra text.";
+        const prompt = `Give me ${KEYWORD_BATCH_SIZE} random, abstract keywords in Korean. Respond only with a JSON array of strings, like ["키워드1", "키워드2", ...]. No other text.`;
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
-        const payload = { contents: chatHistory };
+        const payload = {
+          contents: chatHistory,
+          generationConfig: {
+            responseMimeType: "application/json",
+            responseSchema: {
+              type: "ARRAY",
+              items: { "type": "STRING" }
+            }
+          }
+        };
 
         const response = await fetch(apiUrl, {
           method: 'POST',
@@ -191,48 +199,36 @@
         if (result.candidates && result.candidates.length > 0 &&
             result.candidates[0].content && result.candidates[0].content.parts &&
             result.candidates[0].content.parts.length > 0) {
-          return result.candidates[0].content.parts[0].text.trim();
+          const jsonString = result.candidates[0].content.parts[0].text;
+          try {
+            const parsedArray = JSON.parse(jsonString);
+            if (Array.isArray(parsedArray) && parsedArray.every(item => typeof item === 'string')) {
+              return parsedArray.map(k => k.trim()); // Trim whitespace from keywords
+            }
+          } catch (jsonError) {
+            console.error("Error parsing keyword array JSON:", jsonError);
+            console.error("Malformed JSON received for keywords:", jsonString);
+          }
         }
-        return ""; // Return empty string if no keyword
+        return []; // Return empty array on failure
       } catch (error) {
-        console.error("Error fetching keyword:", error);
-        return ""; // Handle error gracefully
+        console.error("Error fetching keyword batch:", error);
+        return [];
       }
     }
 
-    // Function to fetch a unique keyword from Gemini API
-    async function fetchUniqueKeyword() {
-      let keyword = null;
-      let isUnique = false;
-      let retries = 0;
-
-      while (!isUnique && retries < MAX_FETCH_RETRIES) {
-        keyword = await _fetchSingleKeywordFromGemini();
-        if (keywordHistory.includes(keyword)) {
-          console.log("Duplicate keyword found, retrying...");
-          retries++;
-        } else {
-          isUnique = true;
+    // Function to get a unique keyword from the queue, refilling if necessary
+    async function getUniqueKeywordFromQueue() {
+      if (keywordQueue.length === 0) {
+        console.log("Keyword queue empty, fetching new batch...");
+        const newKeywords = await _fetchKeywordsBatchFromGemini();
+        if (newKeywords.length === 0) {
+          console.warn("Failed to fetch new batch of keywords. Using fallback.");
+          return "상상"; // Fallback keyword if batch fetching fails
         }
+        keywordQueue = newKeywords; // Replace the queue with new keywords
       }
-
-      // If after retries, still not unique, use the last fetched keyword
-      if (!isUnique && keyword) {
-        console.warn("Max retries reached for keyword, displaying potentially duplicate keyword.");
-      } else if (!keyword) {
-        // Fallback if keyword fetching completely fails
-        keyword = "상상"; // Default keyword
-      }
-
-      // Add the unique (or last fetched) keyword to history
-      if (keyword && !keywordHistory.includes(keyword)) { // Ensure we don't add if it was already in history (e.g., after retries)
-        keywordHistory.push(keyword);
-        // Keep history size limited
-        if (keywordHistory.length > MAX_KEYWORD_HISTORY_SIZE) {
-          keywordHistory.shift(); // Remove the oldest keyword
-        }
-      }
-      return keyword;
+      return keywordQueue.shift(); // Get and remove the first keyword
     }
 
     // Function to fetch a new idea and its description from Gemini API, using a keyword
@@ -328,7 +324,7 @@
 
       // After fade-out, update content and fade-in
       setTimeout(async () => {
-        const keyword = await fetchUniqueKeyword(); // Fetch a unique keyword first
+        const keyword = await getUniqueKeywordFromQueue(); // Fetch a unique keyword from the queue
         const fetchedIdea = await fetchIdeaFromGemini(keyword); // Then fetch idea using the keyword
 
         // Update display with the fetched idea and description
