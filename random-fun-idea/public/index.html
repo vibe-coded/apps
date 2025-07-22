@@ -170,15 +170,15 @@
     const apiKey = ""; // Canvas will automatically provide the API key
     const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${apiKey}`;
 
-    // Store the first two words of the last 15 unique Korean ideas to prevent immediate duplicates
-    let ideaHistory = [];
-    const MAX_HISTORY_SIZE = 50;
-    const MAX_FETCH_RETRIES = 5; // Max attempts to get a unique idea from API
+    // Store the last 50 unique keywords to prevent immediate duplicates
+    let keywordHistory = [];
+    const MAX_KEYWORD_HISTORY_SIZE = 50;
+    const MAX_FETCH_RETRIES = 5; // Max attempts to get a unique keyword or idea from API
 
     // Function to fetch a single random keyword from Gemini API
-    async function fetchKeywordFromGemini() {
+    async function _fetchSingleKeywordFromGemini() {
       try {
-        const prompt = "Give me one single, random, abstract keyword. Respond only with the keyword itself, no greetings or extra text.";
+        const prompt = "Give me one single, random, abstract keyword in Korean. Respond only with the keyword itself, no greetings or extra text.";
         const chatHistory = [{ role: "user", parts: [{ text: prompt }] }];
         const payload = { contents: chatHistory };
 
@@ -200,15 +200,50 @@
       }
     }
 
-    // Function to fetch a new idea and its description from Gemini API, optionally using a keyword
+    // Function to fetch a unique keyword from Gemini API
+    async function fetchUniqueKeyword() {
+      let keyword = null;
+      let isUnique = false;
+      let retries = 0;
+
+      while (!isUnique && retries < MAX_FETCH_RETRIES) {
+        keyword = await _fetchSingleKeywordFromGemini();
+        if (keywordHistory.includes(keyword)) {
+          console.log("Duplicate keyword found, retrying...");
+          retries++;
+        } else {
+          isUnique = true;
+        }
+      }
+
+      // If after retries, still not unique, use the last fetched keyword
+      if (!isUnique && keyword) {
+        console.warn("Max retries reached for keyword, displaying potentially duplicate keyword.");
+      } else if (!keyword) {
+        // Fallback if keyword fetching completely fails
+        keyword = "상상"; // Default keyword
+      }
+
+      // Add the unique (or last fetched) keyword to history
+      if (keyword && !keywordHistory.includes(keyword)) { // Ensure we don't add if it was already in history (e.g., after retries)
+        keywordHistory.push(keyword);
+        // Keep history size limited
+        if (keywordHistory.length > MAX_KEYWORD_HISTORY_SIZE) {
+          keywordHistory.shift(); // Remove the oldest keyword
+        }
+      }
+      return keyword;
+    }
+
+    // Function to fetch a new idea and its description from Gemini API, using a keyword
     async function fetchIdeaFromGemini(keyword) {
       try {
         let chatHistory = [];
         // Base prompt for the idea and description.
         let basePrompt = "Please give me one single, short, ridiculous, quirky, and fun idea, along with a brief, creative explanation for it. Provide both the idea and explanation in Korean first, followed by their English translations. The idea should be concise, and the explanation should be 1-2 sentences. Respond only with JSON in the format: {\"idea_ko\": \"아이디어 내용 (한국어)\", \"idea_en\": \"Idea content (English)\", \"description_ko\": \"설명 내용 (한국어)\", \"description_en\": \"Description content (English)\"}";
         
-        // Append keyword if available to encourage diverse responses
-        const prompt = keyword ? `${basePrompt} (키워드: ${keyword})` : basePrompt;
+        // Append keyword to encourage diverse responses
+        const prompt = `${basePrompt} (키워드: ${keyword})`;
         
         chatHistory.push({ role: "user", parts: [{ text: prompt }] });
 
@@ -293,51 +328,8 @@
 
       // After fade-out, update content and fade-in
       setTimeout(async () => {
-        let fetchedIdea = null;
-        let isUnique = false;
-        let retries = 0;
-
-        const keyword = await fetchKeywordFromGemini(); // Fetch keyword first
-
-        // Loop to fetch a unique idea, up to MAX_FETCH_RETRIES times
-        while (!isUnique && retries < MAX_FETCH_RETRIES) {
-          fetchedIdea = await fetchIdeaFromGemini(keyword); // Pass keyword to fetch function
-          
-          // Get the first two words of the Korean idea for duplicate check
-          const firstTwoWords = fetchedIdea.idea_ko.split(' ').slice(0, 2).join(' ');
-
-          if (ideaHistory.includes(firstTwoWords)) {
-            console.log("Duplicate idea (first 2 words) found, retrying...");
-            retries++;
-          } else {
-            isUnique = true;
-          }
-        }
-
-        // If after retries, still not unique, use the last fetched idea
-        if (!isUnique && fetchedIdea) {
-          console.warn("Max retries reached, displaying potentially duplicate idea.");
-        } else if (!fetchedIdea) {
-          // This case should ideally be handled by fetchIdeaFromGemini returning an error object
-          fetchedIdea = {
-            idea_ko: "아이디어를 불러오지 못했습니다.",
-            idea_en: "Failed to load idea.",
-            description_ko: "다시 시도해주세요.",
-            description_en: "Please try again."
-          };
-        }
-
-        // Add the unique (or last fetched) idea's first two words to history
-        if (fetchedIdea.idea_ko) {
-          const currentIdeaFirstTwoWords = fetchedIdea.idea_ko.split(' ').slice(0, 2).join(' ');
-          if (!ideaHistory.includes(currentIdeaFirstTwoWords)) { // Ensure we don't add if it was already in history (e.g., after retries)
-            ideaHistory.push(currentIdeaFirstTwoWords);
-            // Keep history size limited
-            if (ideaHistory.length > MAX_HISTORY_SIZE) {
-              ideaHistory.shift(); // Remove the oldest idea
-            }
-          }
-        }
+        const keyword = await fetchUniqueKeyword(); // Fetch a unique keyword first
+        const fetchedIdea = await fetchIdeaFromGemini(keyword); // Then fetch idea using the keyword
 
         // Update display with the fetched idea and description
         ideaDisplay.innerHTML = `<span class="korean">${fetchedIdea.idea_ko}</span><span class="english">${fetchedIdea.idea_en}</span>`;
