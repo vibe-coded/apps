@@ -1,7 +1,7 @@
 {
   "hosting": {
     "site": "1-word-poem",
-    "public": "./",
+    "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",

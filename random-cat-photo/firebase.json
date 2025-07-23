@@ -1,7 +1,7 @@
 {
   "hosting": {
     "site": "cat-fetcher",
-    "public": "public",
+    "public": ".",
     "ignore": [
       "firebase.json",
       "**/.*",
