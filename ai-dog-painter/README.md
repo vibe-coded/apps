@@ -1,4 +1,3 @@
-# Dog Fetcher
+# AI Dog Painter
 
-Dog Picture Fetcher:
-Fetches a new dog picture every time. That's it.
+* https://ai-dog-painter.web.app/

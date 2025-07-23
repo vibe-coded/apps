@@ -1,4 +1,4 @@
-# Cat Fetcher
+# AI Cat Painter
 
-Cat Picture Fetcher:
-Fetches a new cat picture every time. That's it.
+* https://ai-cat-painter.web.app/
+
