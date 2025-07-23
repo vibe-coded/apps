@@ -1,117 +1,128 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Random Dog Photo</title>
-    <!-- Tailwind CSS CDN -->
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Custom styles for the Inter font */
-        body {
-            font-family: 'Inter', sans-serif;
-        }
-    </style>
-<!-- Google tag (gtag.js) -->
-<script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
-<script>
-  window.dataLayer = window.dataLayer || [];
-  function gtag(){dataLayer.push(arguments);}
-  gtag('js', new Date());
-
-  gtag('config', 'G-NXEW5H90P4');
-</script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AI 강아지 화가</title>
+  <!-- Favicon SVG -->
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E" type="image/svg+xml">
+  <!-- Google Fonts - Nanum Pen Script -->
+  <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <style>
+    body {
+      font-family: 'Nanum Pen Script', cursive; /* Apply Nanum Pen Script font */
+      background-color: #f0f4f8; /* Light blue-gray background */
+    }
+    /* Custom styles for button hover effect */
+    .btn-primary {
+      transition: all 0.2s ease-in-out;
+    }
+    .btn-primary:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+    }
+  </style>
+  <!-- Google tag (gtag.js) -->
+  <script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
+  <script>
+    window.dataLayer = window.dataLayer || [];
+    function gtag(){dataLayer.push(arguments);}
+    gtag('js', new Date());
+    gtag('config', 'G-NXEW5H90P4');
+  </script>
 </head>
-<body class="flex flex-col items-center bg-gray-900 min-h-screen p-4">
+<body class="flex flex-col items-center justify-center min-h-screen p-4">
+  <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center">
+    <h1 class="text-4xl font-bold text-gray-800 mb-6">AI 강아지 화가</h1>
 
-    <!-- Main container to fill the entire screen -->
-    <div id="app-container" class="flex flex-col items-center bg-gray-900 font-inter w-full h-full">
-        <!-- Title at the very top -->
-        <h1 class="text-white text-4xl font-extrabold mb-8 mt-12 text-center">Fun Dog Photo</h1>
-
-        <!-- Loading state -->
-        <div id="loading-indicator" class="flex flex-col items-center text-white text-2xl animate-pulse hidden">
-            <svg class="animate-spin -ml-1 mr-3 h-12 w-12 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            <span class="mt-4">Loading dog photo...</span>
-        </div>
-
-        <!-- Error state -->
-        <div id="error-message" class="bg-red-700 bg-opacity-80 text-white px-8 py-6 rounded-xl relative text-center text-xl shadow-lg hidden">
-            <strong class="font-bold">Error!</strong>
-            <span class="block mt-2" id="error-text"></span>
-            <span class="block text-sm mt-2">Please refresh the page to try again.</span>
-        </div>
-
-        <!-- Image container -->
-        <img id="animal-image" alt="Cute Dog" class="max-w-full max-h-full object-contain mb-8 hidden">
-
-        <!-- Refresh button at the bottom -->
-        <button id="refresh-button" class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-full shadow-lg transition duration-300 ease-in-out transform hover:scale-105 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-75">
-            Refresh
-        </button>
+    <div id="imageContainer" class="relative bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center min-h-[300px] mb-8">
+      <img id="dogImage" src="https://placehold.co/400x300/e0e0e0/ffffff?text=강아지+그림이+여기에+표시됩니다" alt="강아지 그림" class="max-w-full h-auto rounded-xl object-contain" onerror="this.src='https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+로딩+실패';" />
+      <p id="loadingMessage" class="absolute text-gray-600 text-lg font-medium hidden">강아지 그림을 그리는 중...</p>
     </div>
 
-    <script>
-        // Get references to DOM elements
-        const loadingIndicator = document.getElementById('loading-indicator');
-        const errorMessage = document.getElementById('error-message');
-        const errorText = document.getElementById('error-text');
-        const animalImage = document.getElementById('animal-image');
-        const refreshButton = document.getElementById('refresh-button'); // Reference to the new button
+    <button id="generateDogBtn" class="btn-primary bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md mb-8 focus:outline-none focus:ring-4 focus:ring-blue-300">
+      새 강아지 그리기
+    </button>
 
-        // Function to show/hide elements
-        const showElement = (element) => element.classList.remove('hidden');
-        const hideElement = (element) => element.classList.add('hidden');
+    <p class="text-gray-600 mt-6 text-sm">
+      "새 강아지 그리기" 버튼을 눌러 AI가 그려주는 귀여운 강아지 그림을 감상하세요!
+    </p>
+  </div>
 
-        // Asynchronous function to fetch an animal image (now dog)
-        const fetchAnimalImage = async () => {
-            showElement(loadingIndicator); // Show loading indicator
-            hideElement(errorMessage);     // Hide any previous error message
-            hideElement(animalImage);      // Hide previous image
+  <script>
+    // Get references to DOM elements
+    const generateDogBtn = document.getElementById('generateDogBtn');
+    const dogImage = document.getElementById('dogImage');
+    const loadingMessage = document.getElementById('loadingMessage');
+    const imageContainer = document.getElementById('imageContainer');
 
-            try {
-                // Fetch a random dog image from The Dog API
-                // API endpoint for random dog images
-                const response = await fetch('https://dog.ceo/api/breeds/image/random');
+    // Function to generate a dog image using the Gemini API
+    async function generateDogImage() {
+      // Show loading message and disable the button
+      dogImage.classList.add('hidden'); // Hide the previous image
+      loadingMessage.classList.remove('hidden');
+      generateDogBtn.disabled = true;
+      generateDogBtn.textContent = '그림 그리는 중...';
+      imageContainer.classList.add('animate-pulse'); // Add a pulse animation to the container
 
-                if (!response.ok) {
-                    throw new Error(`HTTP error! Status: ${response.status}`);
-                }
+      try {
+        // Define the prompt for image generation
+        const prompt = "A cute, fluffy puppy, in different style each, vibrant colors, happy expression.";
 
-                const data = await response.json();
-                // The Dog API returns data in the format { "message": "image_url", "status": "success" }
-                if (data && data.status === 'success' && data.message) {
-                    animalImage.src = data.message; // Set the image source
-                    showElement(animalImage);      // Show the image
-                } else {
-                    throw new Error('No dog image found.'); // Updated error message
-                }
-            } catch (err) {
-                console.error('Error fetching dog image:', err); // Updated console error
-                errorText.textContent = 'Failed to fetch dog image. Please try again.'; // Updated error message
-                showElement(errorMessage); // Show error message
-            } finally {
-                hideElement(loadingIndicator); // Hide loading indicator
-            }
+        // Construct the payload for the API request
+        const payload = {
+          instances: { prompt: prompt },
+          parameters: { "sampleCount": 1 }
         };
 
-        // Add an error handler for the image itself
-        animalImage.onerror = () => {
-            animalImage.onerror = null; // Prevent infinite loop
-            animalImage.src = 'https://placehold.co/1920x1080/6A0DAD/FFFFFF?text=Image+Load+Failed'; // Larger placeholder
-            errorText.textContent = 'Failed to load image. Please refresh.'; // Updated error message
-            showElement(errorMessage); // Show error message
-            hideElement(loadingIndicator); // Hide loading indicator if it was still showing
-        };
+        // API key (empty string as per instructions, Canvas will provide it at runtime)
+        const apiKey = "";
+        const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
-        // Add event listener to the refresh button
-        refreshButton.addEventListener('click', fetchAnimalImage);
+        // Make the API call
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
 
-        // Fetch an animal image when the page loads
-        window.onload = fetchAnimalImage;
-    </script>
+        // Parse the JSON response
+        const result = await response.json();
+
+        // Check if image data is available in the response
+        if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
+          const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
+          dogImage.src = imageUrl; // Set the image source
+          dogImage.classList.remove('hidden'); // Show the new image
+        } else {
+          // Handle cases where the response structure is unexpected or content is missing
+          console.error('API 응답에서 이미지 데이터를 찾을 수 없습니다:', result);
+          dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+생성+실패'; // Fallback image
+          dogImage.classList.remove('hidden'); // Show fallback
+          console.error('강아지 그림을 생성하는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
+        }
+      } catch (error) {
+        // Handle any errors during the fetch operation
+        console.error('강아지 그림 생성 중 오류 발생:', error);
+        dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=오류+발생'; // Fallback image
+        dogImage.classList.remove('hidden'); // Show fallback
+        console.error('네트워크 오류 또는 서버 문제로 강아지 그림을 생성할 수 없습니다.');
+      } finally {
+        // Hide loading message and re-enable the button
+        loadingMessage.classList.add('hidden');
+        generateDogBtn.disabled = false;
+        generateDogBtn.textContent = '새로운 강아지 그림 그리기';
+        imageContainer.classList.remove('animate-pulse'); // Remove pulse animation
+      }
+    }
+
+    // Add event listener to the button
+    generateDogBtn.addEventListener('click', generateDogImage);
+
+    // Generate an image when the page loads
+    window.onload = generateDogImage;
+  </script>
 </body>
 </html>
