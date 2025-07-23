@@ -33,35 +33,33 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
   <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6 nanum-pen-script-font">AI 강아지 화가</h1>
-
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 nanum-pen-script-font">
+      <span role="img" aria-label="dog emoji" class="mr-2">🐶</span>
+      AI 강아지 화가
+      <span role="img" aria-label="sparkles emoji" class="ml-2">✨</span>
+    </h1>
     <div id="imageContainer" class="relative bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center min-h-[300px] mb-8">
       <img id="dogImage" src="https://placehold.co/400x300/e0e0e0/ffffff?text=강아지+그림이+여기에+표시됩니다" alt="강아지 그림" class="max-w-full h-auto rounded-xl object-contain" onerror="this.src='https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+로딩+실패';" />
       <p id="loadingMessage" class="absolute text-gray-600 text-lg font-medium hidden">강아지 그림을 그리는 중...</p>
     </div>
-
     <button id="generateDogBtn" class="btn-primary bg-blue-500 hover:bg-blue-600 text-white font-semibold py-3 px-6 rounded-xl shadow-md mb-8 focus:outline-none focus:ring-4 focus:ring-blue-300">
       새 강아지 그리기
     </button>
-
     <p class="text-gray-600 mt-6 text-sm">
       "새 강아지 그리기" 버튼을 눌러 AI가 그려주는 귀여운 강아지 그림을 감상하세요!
     </p>
   </div>
-
   <script>
     const generateDogBtn = document.getElementById('generateDogBtn');
     const dogImage = document.getElementById('dogImage');
     const loadingMessage = document.getElementById('loadingMessage');
     const imageContainer = document.getElementById('imageContainer');
-
     async function generateDogImage() {
       dogImage.classList.add('hidden');
       loadingMessage.classList.remove('hidden');
       generateDogBtn.disabled = true;
       generateDogBtn.textContent = '그림 그리는 중...';
       imageContainer.classList.add('animate-pulse');
-
       try {
         const prompt = "A cute, fluffy puppy, in different style each, vibrant colors, happy expression.";
         const payload = {
@@ -70,15 +68,12 @@
         };
         const apiKey = "";
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
-
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
-
         const result = await response.json();
-
         if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
           const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
           dogImage.src = imageUrl;
@@ -97,11 +92,10 @@
       } finally {
         loadingMessage.classList.add('hidden');
         generateDogBtn.disabled = false;
-        generateDogBtn.textContent = '새로운 강아지 그림 그리기';
+        generateDogBtn.textContent = '새 강아지 그리기';
         imageContainer.classList.remove('animate-pulse');
       }
     }
-
     generateDogBtn.addEventListener('click', generateDogImage);
     window.onload = generateDogImage;
   </script>
