@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "cat-fetcher",
+    "site": "ai-poet",
     "public": ".",
     "ignore": [
       "firebase.json",

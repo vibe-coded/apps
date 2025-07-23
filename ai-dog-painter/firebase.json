@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "1-word-poem",
+    "site": "ai-dog-painter",
     "public": ".",
     "ignore": [
       "firebase.json",

@@ -4,23 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AI 고양이 화가</title>
-    <!-- Favicon SVG -->
     <link rel="icon" type="image/svg+xml" href="data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHZpZXdCb3g9IjAgMCAxMDAgMTAwIj4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjU1IiByPSI0MCIgZmlsbD0iI2Y0YTI2MSIvPgogIDxwYXRoIGQ9Ik0zMCA1MCBMNDAgMjAgTDUwIDUwIFoiIGZpbGw9IiNmNGEyNjEiLz4KICA8cGF0aCBkPSJNNzAgNTAgTDYwIDIwIEw1MCA1MCBaIiBmaWxsPSIjZjRhMjYxIi8+CiAgPGNpcmNsZSBjeD0iNDAiIGN5PSI1MCIgcj0iNSIgZmlsbD0iIzI2NDY1MyIvPgogIDxjaXJjbGUgY3g9IjYwIiBjeT0iNTAigcj9IjUiIGZpbGw9IiMyNjQ2NTMiLz4KICA8Y2lyY2xlIGN4PSI1MCIgY3k9IjYwIiByPSIzIiBmaWxsPSIjZTYzOTQ2Ii8+Cjwvc3ZnPg==">
-    <!-- Tailwind CSS CDN -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- Google Fonts - Inter & Nanum Pen Script -->
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&family=Nanum+Pen+Script&display=swap" rel="stylesheet" />
     <style>
-      /* Custom styles for the Inter font */
       body {
         font-family: 'Inter', sans-serif;
       }
-      /* Custom style for the title using Nanum Pen Script */
       .title-font {
         font-family: 'Nanum Pen Script', cursive;
       }
     </style>
-    <!-- Google tag (gtag.js) -->
     <script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
     <script>
       window.dataLayer = window.dataLayer || [];
@@ -39,7 +33,6 @@
       </h1>
 
       <div id="image-container" class="w-full max-w-xs aspect-square bg-gray-50 rounded-2xl flex items-center justify-center overflow-hidden shadow-inner border border-gray-200">
-        <!-- Image, loading spinner, or error message will be rendered here -->
       </div>
 
       <button id="generate-button"
@@ -53,11 +46,9 @@
     </div>
 
     <script>
-      // Get references to DOM elements
       const imageContainer = document.getElementById('image-container');
       const generateButton = document.getElementById('generate-button');
 
-      // Function to display loading state
       const showLoading = () => {
         imageContainer.innerHTML = `
           <div class="flex flex-col items-center justify-center text-gray-600">
@@ -68,18 +59,16 @@
             <span>고양이 생성 중...</span>
           </div>
         `;
-        generateButton.disabled = true; // Disable button during loading
+        generateButton.disabled = true;
         generateButton.classList.add('opacity-60', 'cursor-not-allowed');
       };
 
-      // Function to display an error message
       const showError = (message) => {
         imageContainer.innerHTML = `<p class="text-red-500 text-center p-4">${message}</p>`;
-        generateButton.disabled = false; // Enable button after error
+        generateButton.disabled = false;
         generateButton.classList.remove('opacity-60', 'cursor-not-allowed');
       };
 
-      // Function to display the image
       const showImage = (imageUrl) => {
         imageContainer.innerHTML = `
           <img
@@ -89,18 +78,17 @@
             onerror="this.onerror=null; this.src='https://placehold.co/300x300/cccccc/333333?text=이미지+로드+실패';"
           />
         `;
-        generateButton.disabled = false; // Enable button after image is shown
+        generateButton.disabled = false;
         generateButton.classList.remove('opacity-60', 'cursor-not-allowed');
       };
 
-      // Function to generate cat image (Gemini API call)
       const generateCatImage = async () => {
-        showLoading(); // Show loading spinner
+        showLoading();
 
         try {
-          const prompt = "A cute, fluffy, cartoon-style cat, with big eyes, playful expression, vibrant colors, clean lines, digital art, high resolution.";
+          const prompt = "A cute, fluffy, various-style cat, with big eyes, playful expression, vibrant colors.";
           const payload = { instances: { prompt: prompt }, parameters: { "sampleCount": 1 } };
-          const apiKey = "AIzaSyAIIXYApobGMNUmfFR8eC4MaPp9uQI3xvk"; // If you want to use models other than imagen-3.0-generate-002, provide an API key here. Otherwise, leave this as-is.
+          const apiKey = "";
           const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
           const response = await fetch(apiUrl, {
@@ -124,10 +112,7 @@
         }
       };
 
-      // Event listener for the button
       generateButton.addEventListener('click', generateCatImage);
-
-      // Generate an image when the page loads
       document.addEventListener('DOMContentLoaded', generateCatImage);
     </script>
   </body>

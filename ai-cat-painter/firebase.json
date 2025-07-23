@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "random-dog-photo",
+    "site": "ai-cat-painter",
     "public": ".",
     "ignore": [
       "firebase.json",

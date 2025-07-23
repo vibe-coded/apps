@@ -4,18 +4,17 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>AI 강아지 화가</title>
-  <!-- Favicon SVG -->
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Ctext y='.9em' font-size='90'%3E%F0%9F%90%B6%3C/text%3E%3C/svg%3E" type="image/svg+xml">
-  <!-- Google Fonts - Nanum Pen Script -->
   <link href="https://fonts.googleapis.com/css2?family=Nanum+Pen+Script&display=swap" rel="stylesheet">
-  <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <style>
     body {
-      font-family: 'Nanum Pen Script', cursive; /* Apply Nanum Pen Script font */
-      background-color: #f0f4f8; /* Light blue-gray background */
+      font-family: 'Inter', sans-serif;
+      background-color: #f0f4f8;
     }
-    /* Custom styles for button hover effect */
+    .nanum-pen-script-font {
+      font-family: 'Nanum Pen Script', cursive;
+    }
     .btn-primary {
       transition: all 0.2s ease-in-out;
     }
@@ -24,7 +23,6 @@
       box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
     }
   </style>
-  <!-- Google tag (gtag.js) -->
   <script async src="https://www.googletagmanager.com/gtag/js?id=G-NXEW5H90P4"></script>
   <script>
     window.dataLayer = window.dataLayer || [];
@@ -35,7 +33,7 @@
 </head>
 <body class="flex flex-col items-center justify-center min-h-screen p-4">
   <div class="bg-white p-8 rounded-2xl shadow-xl max-w-lg w-full text-center">
-    <h1 class="text-4xl font-bold text-gray-800 mb-6">AI 강아지 화가</h1>
+    <h1 class="text-4xl font-bold text-gray-800 mb-6 nanum-pen-script-font">AI 강아지 화가</h1>
 
     <div id="imageContainer" class="relative bg-gray-100 rounded-xl overflow-hidden shadow-inner flex items-center justify-center min-h-[300px] mb-8">
       <img id="dogImage" src="https://placehold.co/400x300/e0e0e0/ffffff?text=강아지+그림이+여기에+표시됩니다" alt="강아지 그림" class="max-w-full h-auto rounded-xl object-contain" onerror="this.src='https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+로딩+실패';" />
@@ -52,76 +50,59 @@
   </div>
 
   <script>
-    // Get references to DOM elements
     const generateDogBtn = document.getElementById('generateDogBtn');
     const dogImage = document.getElementById('dogImage');
     const loadingMessage = document.getElementById('loadingMessage');
     const imageContainer = document.getElementById('imageContainer');
 
-    // Function to generate a dog image using the Gemini API
     async function generateDogImage() {
-      // Show loading message and disable the button
-      dogImage.classList.add('hidden'); // Hide the previous image
+      dogImage.classList.add('hidden');
       loadingMessage.classList.remove('hidden');
       generateDogBtn.disabled = true;
       generateDogBtn.textContent = '그림 그리는 중...';
-      imageContainer.classList.add('animate-pulse'); // Add a pulse animation to the container
+      imageContainer.classList.add('animate-pulse');
 
       try {
-        // Define the prompt for image generation
         const prompt = "A cute, fluffy puppy, in different style each, vibrant colors, happy expression.";
-
-        // Construct the payload for the API request
         const payload = {
           instances: { prompt: prompt },
           parameters: { "sampleCount": 1 }
         };
-
-        // API key (empty string as per instructions, Canvas will provide it at runtime)
         const apiKey = "";
         const apiUrl = `https://generativelanguage.googleapis.com/v1beta/models/imagen-3.0-generate-002:predict?key=${apiKey}`;
 
-        // Make the API call
         const response = await fetch(apiUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify(payload)
         });
 
-        // Parse the JSON response
         const result = await response.json();
 
-        // Check if image data is available in the response
         if (result.predictions && result.predictions.length > 0 && result.predictions[0].bytesBase64Encoded) {
           const imageUrl = `data:image/png;base64,${result.predictions[0].bytesBase64Encoded}`;
-          dogImage.src = imageUrl; // Set the image source
-          dogImage.classList.remove('hidden'); // Show the new image
+          dogImage.src = imageUrl;
+          dogImage.classList.remove('hidden');
         } else {
-          // Handle cases where the response structure is unexpected or content is missing
           console.error('API 응답에서 이미지 데이터를 찾을 수 없습니다:', result);
-          dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+생성+실패'; // Fallback image
-          dogImage.classList.remove('hidden'); // Show fallback
+          dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=이미지+생성+실패';
+          dogImage.classList.remove('hidden');
           console.error('강아지 그림을 생성하는 데 실패했습니다. 잠시 후 다시 시도해주세요.');
         }
       } catch (error) {
-        // Handle any errors during the fetch operation
         console.error('강아지 그림 생성 중 오류 발생:', error);
-        dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=오류+발생'; // Fallback image
-        dogImage.classList.remove('hidden'); // Show fallback
+        dogImage.src = 'https://placehold.co/400x300/e0e0e0/ffffff?text=오류+발생';
+        dogImage.classList.remove('hidden');
         console.error('네트워크 오류 또는 서버 문제로 강아지 그림을 생성할 수 없습니다.');
       } finally {
-        // Hide loading message and re-enable the button
         loadingMessage.classList.add('hidden');
         generateDogBtn.disabled = false;
         generateDogBtn.textContent = '새로운 강아지 그림 그리기';
-        imageContainer.classList.remove('animate-pulse'); // Remove pulse animation
+        imageContainer.classList.remove('animate-pulse');
       }
     }
 
-    // Add event listener to the button
     generateDogBtn.addEventListener('click', generateDogImage);
-
-    // Generate an image when the page loads
     window.onload = generateDogImage;
   </script>
 </body>
